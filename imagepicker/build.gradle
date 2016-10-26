@@ -7,10 +7,6 @@ android {
   compileSdkVersion rootProject.ext.compileSdkVersion
   buildToolsVersion rootProject.ext.buildToolsVersion
 
-  dataBinding {
-    enabled true
-  }
-
   defaultConfig {
     minSdkVersion rootProject.ext.minSdkVersion
 
@@ -44,6 +40,8 @@ dependencies {
   compile rootProject.ext.supportAnnotations
   compile rootProject.ext.appCompatV7
   compile rootProject.ext.recyclerViewV7
+  compile rootProject.ext.rxJava
+  compile rootProject.ext.rxAndroid
   testCompile rootProject.ext.junit
   androidTestCompile(rootProject.ext.espressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
