@@ -11,6 +11,8 @@ ext {
   supportAnnotations = 'com.android.support:support-annotations:24.2.1'
   rxAndroid = 'io.reactivex:rxandroid:1.2.1'
   rxJava = 'io.reactivex:rxjava:1.2.0'
+  leakCanary = 'com.squareup.leakcanary:leakcanary-android:1.5'
+  leakCanaryNoOps = 'com.squareup.leakcanary:leakcanary-android:1.5'
 
   // Testing
   junit = 'junit:junit:4.12'

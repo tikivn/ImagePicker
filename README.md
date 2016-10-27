@@ -6,8 +6,34 @@ One picker to rule them all.
 
 ![](logo.png)
 
-## Sample Usage
-   
+## Install
+Declare `provider`
+
+  - `AndroidManifest.xml`
+    ~~~xml
+      <application>
+        ...
+        <provider
+          android:name="android.support.v4.content.FileProvider"
+          android:authorities="PACKAGE_NAME.file_provider"
+          android:exported="false"
+          android:grantUriPermissions="true">
+          <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/file_paths"/>
+        </provider>
+        ...
+      </application>
+    ~~~   
+  - @xml/file_paths
+    ~~~xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <paths xmlns:android="http://schemas.android.com/apk/res/android">
+        <external-path name="my_images" path="Android/data/PACKAGE_NAME/files/Pictures" />
+    </paths
+    ~~~
+  - PACKAGE_NAME: app's package name
+ 
 See more in the sample
 
 ## Download
