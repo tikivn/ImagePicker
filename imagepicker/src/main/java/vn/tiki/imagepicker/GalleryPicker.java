@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
+import android.support.v4.os.OperationCanceledException;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -30,22 +27,10 @@ import rx.subscriptions.CompositeSubscription;
  */
 
 public class GalleryPicker {
-  private static final SimpleDateFormat DATE_FORMAT =
-      new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
+
   private static final int GALLERY_REQUEST_CODE = 24031;
   private Callback callback;
   private CompositeSubscription subscriptions = new CompositeSubscription();
-
-  private static File createImageFile(Context context) throws IOException {
-    // Create an image file name
-    final String timeStamp = DATE_FORMAT.format(new Date());
-    final String imageFileName = "JPEG_" + timeStamp + "_";
-    final File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-    return File.createTempFile(imageFileName,  /* prefix */
-        ".jpg",         /* suffix */
-        storageDir      /* directory */);
-  }
 
   public void setCallback(Callback callback) {
     this.callback = callback;
@@ -69,16 +54,12 @@ public class GalleryPicker {
     // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
     // response to some other intent, and the code below shouldn't run at all.
 
-    if (callback != null
-        && requestCode == GALLERY_REQUEST_CODE
-        && resultCode == Activity.RESULT_OK) {
+    if (callback != null && requestCode == GALLERY_REQUEST_CODE) {
       // The document selected by the user won't be returned in the intent.
       // Instead, a URI to that document will be contained in the return intent
       // provided to this method as a parameter.
       // Pull that URI using resultData.getData().
-      if (data == null) {
-        callback.onError(new IOException("no data"));
-      } else {
+      if (resultCode == Activity.RESULT_OK && data != null) {
         final Uri uri = data.getData();
         subscriptions.add(saveUriToFile(context, uri).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -95,6 +76,10 @@ public class GalleryPicker {
                 }
               }
             }));
+      } else if (resultCode == Activity.RESULT_CANCELED) {
+        callback.onError(new OperationCanceledException("action is canceled"));
+      } else {
+        callback.onError(new IOException("no data"));
       }
     }
   }
@@ -141,7 +126,7 @@ public class GalleryPicker {
       if (contextRef.get() == null) {
         return null;
       }
-      final File imageFile = createImageFile(contextRef.get());
+      final File imageFile = Util.createImageFile(contextRef.get());
       ParcelFileDescriptor parcelFileDescriptor = null;
       InputStream inputStream = null;
       OutputStream outputStream = null;
