@@ -12,7 +12,7 @@ jdk:
 before_script:
 - rm -rf ~/.gradle/caches/
 script:
-- ./gradlew ":noadapter:build"
+- ./gradlew ":imagepicker:build"
 after_success:
 - ".buildscript/deploy_snapshot.sh"
 env:
