@@ -57,23 +57,23 @@ public class CameraPicker {
     }
   }
 
-  public void onRequestPermissionsResult(Activity activity, int requestCode,
-      String permissions[], int[] grantResults) {
+  public void onRequestPermissionsResult(Activity activity, int requestCode, String[] permissions,
+      int[] grantResults) {
+
     if (requestCode != PERMISSIONS_REQUEST_CODE) {
       return;
     }
 
-    if (grantResults.length > 0
-        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
       openPicker(activity);
     } else if (callback != null) {
-      callback.onError(new SecurityException("permission " + Manifest.permission.CAMERA + " is not granted"));
+      callback.onError(
+          new SecurityException("permission " + Manifest.permission.CAMERA + " is not granted"));
     }
   }
+
   private void requestPermission(Activity activity) {
-    ActivityCompat.requestPermissions(activity,
-        new String[]{Manifest.permission.CAMERA},
+    ActivityCompat.requestPermissions(activity, new String[] {Manifest.permission.CAMERA},
         PERMISSIONS_REQUEST_CODE);
   }
 
