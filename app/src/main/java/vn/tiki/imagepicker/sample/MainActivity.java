@@ -2,6 +2,7 @@ package vn.tiki.imagepicker.sample;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -56,6 +57,12 @@ public class MainActivity extends AppCompatActivity {
     Log.d(TAG, "onActivityResult: ");
     galleryPicker.handleResult(this, requestCode, resultCode, data);
     cameraPicker.handleResult(requestCode, resultCode, data);
+  }
+
+  @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    cameraPicker.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
   }
 
   @Override protected void onDestroy() {
