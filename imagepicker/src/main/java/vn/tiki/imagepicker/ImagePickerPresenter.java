@@ -54,7 +54,7 @@ public class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
             final ImagePickerView view = getView();
             if (view != null) {
               view.showItems(objects);
-              view.showCount();
+              view.showCount(count);
             }
           }
         }));
