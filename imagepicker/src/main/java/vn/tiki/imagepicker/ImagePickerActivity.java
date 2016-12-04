@@ -32,7 +32,6 @@ import vn.tiki.noadapter.TypeDeterminer;
 public class ImagePickerActivity extends AppCompatActivity
     implements EasyPermissions.PermissionCallbacks, ImagePickerView {
 
-  private static final String TAG = "ImagePickerActivity";
   private static final int RC_WRITE_EXTERNAL_STORAGE = 1;
   private static final int RC_SETTINGS_SCREEN = 2;
   private RecyclerView rvImages;
@@ -59,7 +58,7 @@ public class ImagePickerActivity extends AppCompatActivity
     setupLayoutManager(4);
 
     setupAdapter();
-    setTitle("(0/10)");
+    setTitle("(0/5)");
   }
 
   @Override
@@ -138,6 +137,7 @@ public class ImagePickerActivity extends AppCompatActivity
     if (EasyPermissions.hasPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
       loadImages();
     } else {
+      showEmpty();
       EasyPermissions.requestPermissions(this, getString(R.string.msg_no_write_external_permission),
           RC_WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
@@ -149,6 +149,8 @@ public class ImagePickerActivity extends AppCompatActivity
   }
 
   @Override public void showItems(@NonNull List<?> items) {
+    vLoading.setVisibility(View.GONE);
+    rvImages.setVisibility(View.VISIBLE);
     final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ItemDiffCallback(
         items,
         this.items));
@@ -165,7 +167,6 @@ public class ImagePickerActivity extends AppCompatActivity
 
   @Override public void hideLoading() {
     vLoading.setVisibility(View.GONE);
-    rvImages.setVisibility(View.VISIBLE);
   }
 
   @Override public void showEmpty() {
@@ -174,7 +175,7 @@ public class ImagePickerActivity extends AppCompatActivity
   }
 
   @Override public void showCount(int count) {
-    setTitle(String.format(Locale.getDefault(), "%d/10", count));
+    setTitle(String.format(Locale.getDefault(), "%d/5", count));
   }
 
   private void setupLayoutManager(int spanCount) {

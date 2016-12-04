@@ -60,7 +60,7 @@ public class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
         }));
   }
 
-  public void loadImages(Context context) {
+  void loadImages(Context context) {
     if (getView() == null) {
       return;
     }
@@ -88,7 +88,6 @@ public class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
             if (view == null) {
               return;
             }
-            view.hideLoading();
 
             if (images.isEmpty()) {
               view.showEmpty();
