@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="msg_no_write_external_permission">Please grant storage permission to select images</string>
+  <string name="msg_no_write_external_permission">Please grant storage permission to select images
+  </string>
   <string name="permission_not_granted">Permission is not granted</string>
   <string name="ok">OK</string>
   <string name="cancel">Cancel</string>
+  <string name="done">Done</string>
   <string name="setting">Setting</string>
   <string name="title_settings_dialog">Open settings</string>
 </resources>

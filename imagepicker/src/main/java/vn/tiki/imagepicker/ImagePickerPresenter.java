@@ -121,4 +121,17 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
     super.detachView();
     subscription.clear();
   }
+
+  ArrayList<String> getSelectedImagePaths() {
+    if (items.isEmpty()) {
+      return new ArrayList<>(0);
+    }
+    final ArrayList<String> selectedImagePaths = new ArrayList<>();
+    for (Object item : items) {
+      if (item instanceof Image && ((Image) item).isSelected()) {
+        selectedImagePaths.add(((Image) item).getPath());
+      }
+    }
+    return selectedImagePaths;
+  }
 }

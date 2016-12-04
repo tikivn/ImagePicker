@@ -13,9 +13,11 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -61,8 +63,23 @@ public class ImagePickerActivity extends AppCompatActivity
     setTitle("(0/5)");
   }
 
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.picker_menu, menu);
+    return true;
+  }
+
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == R.id.action_done) {
+      final ArrayList<String> selectedImagePaths = presenter.getSelectedImagePaths();
+      if (!selectedImagePaths.isEmpty()) {
+        final Intent data = new Intent();
+        data.putStringArrayListExtra("imagePaths", selectedImagePaths);
+        setResult(RESULT_OK, data);
+      }
+      finish();
+      return true;
+    }
     switch (item.getItemId()) {
       // Respond to the action bar's Up/Home button
       case android.R.id.home:
@@ -175,7 +192,7 @@ public class ImagePickerActivity extends AppCompatActivity
   }
 
   @Override public void showCount(int count) {
-    setTitle(String.format(Locale.getDefault(), "%d/5", count));
+    setTitle(String.format(Locale.getDefault(), "(%d/5)", count));
   }
 
   private void setupLayoutManager(int spanCount) {
