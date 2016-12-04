@@ -19,19 +19,20 @@ import vn.tiki.imagepicker.mvp.MvpPresenter;
  * Created by Giang Nguyen on 12/2/16.
  */
 
-public class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
+class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
 
+  private static final int MAX = 5;
   private static final String TAG = "ImagePickerPresenter";
   private final LocalImageLoader imageLoader;
   private CompositeSubscription subscription = new CompositeSubscription();
   private List<Object> items = Collections.emptyList();
   private int count = 0;
 
-  public ImagePickerPresenter(@NonNull LocalImageLoader imageLoader) {
+  ImagePickerPresenter(@NonNull LocalImageLoader imageLoader) {
     this.imageLoader = imageLoader;
   }
 
-  public void toggleSelect(final Object item) {
+  void toggleSelect(final Object item) {
     subscription.add(Observable.from(this.items)
         .map(new Func1<Object, Object>() {
           @Override public Object call(Object o) {
@@ -40,6 +41,8 @@ public class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
               if (((Image) o).isSelected()) {
                 index = 0;
                 count--;
+              } else if (count >= MAX) {
+                return o;
               } else {
                 count++;
                 index = count;
