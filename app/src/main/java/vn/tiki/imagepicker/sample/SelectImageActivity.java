@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import vn.tiki.imagepicker.ImagePickerActivity;
@@ -19,14 +18,11 @@ public class SelectImageActivity extends AppCompatActivity {
 
   private static final String TAG = "SelectImageActivity";
   private static final int IC_PICK_IMAGE = 1010;
-  private ImageView ivImage;
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.activity_select_image);
-
-    ivImage = ((ImageView) findViewById(R.id.ivImage));
 
     findViewById(R.id.btPickImage)
         .setOnClickListener(new View.OnClickListener() {

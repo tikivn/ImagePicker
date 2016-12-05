@@ -19,7 +19,6 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -94,12 +93,9 @@ public class ImagePickerActivity extends AppCompatActivity
       final ArrayList<String> selectedImagePaths = presenter.getSelectedImagePaths();
       setResultData(selectedImagePaths);
       return true;
-    }
-    switch (item.getItemId()) {
-      // Respond to the action bar's Up/Home button
-      case android.R.id.home:
-        finish();
-        return true;
+    } else if (item.getItemId() == android.R.id.home) {
+      finish();
+      return true;
     }
     return super.onOptionsItemSelected(item);
   }
@@ -124,16 +120,6 @@ public class ImagePickerActivity extends AppCompatActivity
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-
-    Log.d(
-        TAG,
-        "onActivityResult() called with: requestCode = ["
-            + requestCode
-            + "], resultCode = ["
-            + resultCode
-            + "], data = ["
-            + data
-            + "]");
     switch (requestCode) {
       case RC_SETTINGS_SCREEN:
         if (!EasyPermissions.hasPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -147,13 +133,11 @@ public class ImagePickerActivity extends AppCompatActivity
           Uri imageUri = Uri.parse(currentImagePath);
           if (imageUri != null) {
             final String path = imageUri.getPath();
-            Log.d(TAG, "onActivityResult: path: " + path);
             MediaScannerConnection.scanFile(this,
                 new String[] { path }, null,
                 new MediaScannerConnection.OnScanCompletedListener() {
                   @Override
                   public void onScanCompleted(String path, Uri uri) {
-                    Log.v(TAG, "File " + path + " was scanned successfully: " + uri);
                     runOnUiThread(new Runnable() {
                       @Override public void run() {
                         loadImages();
@@ -163,6 +147,8 @@ public class ImagePickerActivity extends AppCompatActivity
                 });
           }
         }
+        break;
+      default:
         break;
     }
   }
@@ -203,6 +189,8 @@ public class ImagePickerActivity extends AppCompatActivity
         break;
       case RC_CAMERA:
         captureImage();
+        break;
+      default:
         break;
     }
   }

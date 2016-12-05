@@ -1,6 +1,5 @@
 package vn.tiki.imagepicker;
 
-import android.content.Context;
 import android.databinding.BindingAdapter;
 import android.os.Environment;
 import android.widget.ImageView;
@@ -24,10 +23,11 @@ public class Util {
     //no instance
   }
 
-  public static File createImageFile(String directory) throws IOException {
-
+  static File createImageFile(String directory) throws IOException {
     // External sdcard location
-    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), directory);
+    File mediaStorageDir = new File(
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+        directory);
 
     // Create the storage directory if it does not exist
     if (!mediaStorageDir.exists()) {
@@ -41,17 +41,6 @@ public class Util {
     String imageFileName = "IMG_" + timeStamp;
 
     return File.createTempFile(imageFileName, ".jpg", mediaStorageDir);
-  }
-
-  static File createImageFile(Context context) throws IOException {
-    // Create an image file name
-    final String timeStamp = DATE_FORMAT.format(new Date());
-    final String imageFileName = "JPEG_" + timeStamp + "_";
-    final File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-    return File.createTempFile(imageFileName,  /* prefix */
-        ".jpg",         /* suffix */
-        storageDir      /* directory */);
   }
 
   @BindingAdapter("filePath")
@@ -70,5 +59,4 @@ public class Util {
     }
     requestCreator.into(imageView);
   }
-
 }
