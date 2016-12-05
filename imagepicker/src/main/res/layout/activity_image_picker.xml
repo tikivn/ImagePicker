@@ -12,21 +12,35 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:padding="@dimen/grid_spacing"
-      android:visibility="gone"
-  />
+      android:visibility="gone"/>
 
   <ProgressBar
       android:id="@+id/vLoading"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
-  />
-
-  <ImageView
-      android:id="@+id/vEmpty"
-      android:layout_width="96dp"
-      android:layout_height="96dp"
-      android:layout_gravity="center"
-      android:src="@drawable/ic_empty_24dp"
       android:visibility="gone"/>
+
+  <LinearLayout
+      android:id="@+id/vEmpty"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:gravity="center"
+      android:orientation="vertical"
+      android:visibility="gone">
+
+    <ImageView
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@drawable/ic_empty_24dp"
+    />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/empty"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2"/>
+  </LinearLayout>
 </FrameLayout>

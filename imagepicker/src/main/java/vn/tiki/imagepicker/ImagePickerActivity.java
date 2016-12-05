@@ -165,8 +165,7 @@ public class ImagePickerActivity extends AppCompatActivity
   public void onPermissionsDenied(int requestCode, List<String> perms) {
     // (Optional) Check whether the user denied any permissions and checked "NEVER ASK AGAIN."
     // This will display a dialog directing them to enable the permission in app settings.
-    if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)
-        && requestCode == RC_WRITE_EXTERNAL_STORAGE) {
+    if (requestCode == RC_WRITE_EXTERNAL_STORAGE) {
       final Snackbar snackbar = Snackbar.make(rvImages, R.string.msg_no_write_external_permission,
           Snackbar.LENGTH_INDEFINITE);
       snackbar.setAction(R.string.ok, new View.OnClickListener() {
@@ -314,9 +313,9 @@ public class ImagePickerActivity extends AppCompatActivity
           @Override public int layoutForType(int type) {
             switch (type) {
               case 2:
-                return R.layout.item_image;
+                return R.layout.item_image_picker;
               case 1:
-                return R.layout.item_image_selected;
+                return R.layout.item_image_picker_selected;
               default:
                 return R.layout.item_camera_capture;
             }
