@@ -31,6 +31,7 @@ dependencies {
   })
   compile rootProject.ext.appCompatV7
   compile rootProject.ext.imagePicker
+  compile rootProject.ext.picasso
   debugCompile rootProject.ext.leakCanary
   releaseCompile rootProject.ext.leakCanaryNoOps
   testCompile rootProject.ext.leakCanaryNoOps

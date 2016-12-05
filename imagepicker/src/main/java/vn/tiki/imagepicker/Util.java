@@ -2,9 +2,6 @@ package vn.tiki.imagepicker;
 
 import android.databinding.BindingAdapter;
 import android.os.Environment;
-import android.widget.ImageView;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -44,19 +41,7 @@ public class Util {
   }
 
   @BindingAdapter("filePath")
-  public static void loadImageFileToImageView(ImageView imageView, String filePath) {
-    final int width = imageView.getMeasuredWidth();
-    final int height = imageView.getMeasuredHeight();
-    final RequestCreator requestCreator = Picasso.with(imageView.getContext())
-        .load(new File(filePath));
-
-    if (imageView.getScaleType() == ImageView.ScaleType.CENTER_CROP) {
-      requestCreator.resize(width, height).centerCrop();
-    } else if (imageView.getScaleType() == ImageView.ScaleType.CENTER_INSIDE) {
-      requestCreator.resize(width, height).centerInside();
-    } else {
-      requestCreator.fit();
-    }
-    requestCreator.into(imageView);
+  public static void loadImageFileToImageView(PicassoImageView imageView, String filePath) {
+    imageView.setImagePath(filePath);
   }
 }

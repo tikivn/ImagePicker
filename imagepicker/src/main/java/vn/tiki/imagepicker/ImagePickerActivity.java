@@ -36,6 +36,8 @@ import vn.tiki.noadapter.OnItemClickListener;
 import vn.tiki.noadapter.OnlyAdapter;
 import vn.tiki.noadapter.TypeDeterminer;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Created by Giang Nguyen on 12/2/16.
  */
@@ -46,7 +48,6 @@ public class ImagePickerActivity extends AppCompatActivity
   private static final int RC_SETTINGS_SCREEN = 2;
   private static final int RC_CAMERA = 3;
   private static final int RC_CAPTURE = 4;
-  private static final String TAG = "ImagePickerActivity";
   private RecyclerView rvImages;
   private OnlyAdapter adapter;
   private List<?> items;
@@ -68,7 +69,7 @@ public class ImagePickerActivity extends AppCompatActivity
         imageLoader,
         pickerSupported);
 
-    setContentView(R.layout.activity_image_picker);
+    setContentView(R.layout.activity_picker_image_picker);
 
     setupActionBar();
 
@@ -313,11 +314,11 @@ public class ImagePickerActivity extends AppCompatActivity
           @Override public int layoutForType(int type) {
             switch (type) {
               case 2:
-                return R.layout.item_image_picker;
+                return R.layout.item_image_list_image_picker;
               case 1:
-                return R.layout.item_image_picker_selected;
+                return R.layout.item_image_list_image_picker_selected;
               default:
-                return R.layout.item_camera_capture;
+                return R.layout.item_camera_capture_image_picker;
             }
           }
         })
