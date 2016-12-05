@@ -21,4 +21,17 @@ public class Image {
   public boolean isSelected() {
     return index > 0;
   }
+
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Image image = (Image) o;
+
+    return getPath() != null ? getPath().equals(image.getPath()) : image.getPath() == null;
+  }
+
+  @Override public int hashCode() {
+    return getPath() != null ? getPath().hashCode() : 0;
+  }
 }

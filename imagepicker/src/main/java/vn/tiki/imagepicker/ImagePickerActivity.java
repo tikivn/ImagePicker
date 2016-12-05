@@ -2,27 +2,36 @@ package vn.tiki.imagepicker;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 import vn.tiki.imagepicker.entity.Image;
+import vn.tiki.imagepicker.entity.PickerItem;
 import vn.tiki.noadapter.LayoutSelector;
 import vn.tiki.noadapter.OnItemClickListener;
 import vn.tiki.noadapter.OnlyAdapter;
@@ -36,18 +45,29 @@ public class ImagePickerActivity extends AppCompatActivity
 
   private static final int RC_WRITE_EXTERNAL_STORAGE = 1;
   private static final int RC_SETTINGS_SCREEN = 2;
+  private static final int RC_CAMERA = 3;
+  private static final int RC_CAPTURE = 4;
+  private static final String TAG = "ImagePickerActivity";
   private RecyclerView rvImages;
   private OnlyAdapter adapter;
   private List<?> items;
   private ImagePickerPresenter presenter;
   private View vLoading;
   private View vEmpty;
+  private String currentImagePath;
+
+  @NonNull private Intent cameraIntent() {
+    return new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+  }
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     LocalImageLoader imageLoader = new LocalImageLoader();
-    presenter = new ImagePickerPresenter(imageLoader);
+    final boolean pickerSupported = cameraIntent().resolveActivity(getPackageManager()) != null;
+    presenter = new ImagePickerPresenter(
+        imageLoader,
+        pickerSupported);
 
     setContentView(R.layout.activity_image_picker);
 
@@ -60,7 +80,7 @@ public class ImagePickerActivity extends AppCompatActivity
     setupLayoutManager(4);
 
     setupAdapter();
-    setTitle("(0/5)");
+    setTitle(getString(R.string.selection_format, 0, 5));
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,12 +92,7 @@ public class ImagePickerActivity extends AppCompatActivity
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_done) {
       final ArrayList<String> selectedImagePaths = presenter.getSelectedImagePaths();
-      if (!selectedImagePaths.isEmpty()) {
-        final Intent data = new Intent();
-        data.putStringArrayListExtra("imagePaths", selectedImagePaths);
-        setResult(RESULT_OK, data);
-      }
-      finish();
+      setResultData(selectedImagePaths);
       return true;
     }
     switch (item.getItemId()) {
@@ -87,6 +102,15 @@ public class ImagePickerActivity extends AppCompatActivity
         return true;
     }
     return super.onOptionsItemSelected(item);
+  }
+
+  private void setResultData(ArrayList<String> imagePaths) {
+    if (!imagePaths.isEmpty()) {
+      final Intent data = new Intent();
+      data.putStringArrayListExtra("imagePaths", imagePaths);
+      setResult(RESULT_OK, data);
+    }
+    finish();
   }
 
   private void setupActionBar() {
@@ -101,10 +125,45 @@ public class ImagePickerActivity extends AppCompatActivity
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    if (requestCode == RC_SETTINGS_SCREEN) {
-      // Do something after user returned from app settings screen, like showing a Toast.
-      Toast.makeText(this, R.string.permission_not_granted, Toast.LENGTH_SHORT)
-          .show();
+    Log.d(
+        TAG,
+        "onActivityResult() called with: requestCode = ["
+            + requestCode
+            + "], resultCode = ["
+            + resultCode
+            + "], data = ["
+            + data
+            + "]");
+    switch (requestCode) {
+      case RC_SETTINGS_SCREEN:
+        if (!EasyPermissions.hasPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+          // Do something after user returned from app settings screen, like showing a Toast.
+          Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT)
+              .show();
+        }
+        break;
+      case RC_CAPTURE:
+        if (resultCode == RESULT_OK && currentImagePath != null) {
+          Uri imageUri = Uri.parse(currentImagePath);
+          if (imageUri != null) {
+            final String path = imageUri.getPath();
+            Log.d(TAG, "onActivityResult: path: " + path);
+            MediaScannerConnection.scanFile(this,
+                new String[] { path }, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                  @Override
+                  public void onScanCompleted(String path, Uri uri) {
+                    Log.v(TAG, "File " + path + " was scanned successfully: " + uri);
+                    runOnUiThread(new Runnable() {
+                      @Override public void run() {
+                        loadImages();
+                      }
+                    });
+                  }
+                });
+          }
+        }
+        break;
     }
   }
 
@@ -112,7 +171,6 @@ public class ImagePickerActivity extends AppCompatActivity
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull
       int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
     // Forward results to EasyPermissions
     EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
   }
@@ -121,7 +179,8 @@ public class ImagePickerActivity extends AppCompatActivity
   public void onPermissionsDenied(int requestCode, List<String> perms) {
     // (Optional) Check whether the user denied any permissions and checked "NEVER ASK AGAIN."
     // This will display a dialog directing them to enable the permission in app settings.
-    if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+    if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)
+        && requestCode == RC_WRITE_EXTERNAL_STORAGE) {
       final Snackbar snackbar = Snackbar.make(rvImages, R.string.msg_no_write_external_permission,
           Snackbar.LENGTH_INDEFINITE);
       snackbar.setAction(R.string.ok, new View.OnClickListener() {
@@ -138,8 +197,32 @@ public class ImagePickerActivity extends AppCompatActivity
   }
 
   @Override public void onPermissionsGranted(int requestCode, List<String> list) {
-    if (requestCode == RC_WRITE_EXTERNAL_STORAGE) {
-      loadImages();
+    switch (requestCode) {
+      case RC_WRITE_EXTERNAL_STORAGE:
+        loadImages();
+        break;
+      case RC_CAMERA:
+        captureImage();
+        break;
+    }
+  }
+
+  @AfterPermissionGranted(RC_CAMERA)
+  void captureImage() {
+    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    if (intent.resolveActivity(getPackageManager()) != null) {
+      try {
+        final File imageFile = Util.createImageFile("Camera");
+        final String authority = getPackageName() + ".file_provider";
+        final Uri uri = FileProvider.getUriForFile(this, authority, imageFile);
+        currentImagePath = "file:" + imageFile.getAbsolutePath();
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        startActivityForResult(intent, RC_CAPTURE);
+      } catch (IOException e) {
+        Toast.makeText(this, getString(R.string.error_create_image_file), Toast.LENGTH_LONG).show();
+      }
+    } else {
+      Toast.makeText(this, getString(R.string.error_no_camera), Toast.LENGTH_LONG).show();
     }
   }
 
@@ -163,6 +246,26 @@ public class ImagePickerActivity extends AppCompatActivity
   @Override protected void onStop() {
     presenter.detachView();
     super.onStop();
+  }
+
+  /**
+   * Request for camera permission
+   */
+  private void captureImageWithPermission() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+      if (rc == PackageManager.PERMISSION_GRANTED) {
+        captureImage();
+      } else {
+        EasyPermissions.requestPermissions(
+            this,
+            getString(R.string.msg_no_camera_permission),
+            RC_CAMERA,
+            Manifest.permission.CAMERA);
+      }
+    } else {
+      captureImage();
+    }
   }
 
   @Override public void showItems(@NonNull List<?> items) {
@@ -192,7 +295,7 @@ public class ImagePickerActivity extends AppCompatActivity
   }
 
   @Override public void showCount(int count) {
-    setTitle(String.format(Locale.getDefault(), "(%d/5)", count));
+    setTitle(getString(R.string.selection_format, count, 5));
   }
 
   private void setupLayoutManager(int spanCount) {
@@ -235,6 +338,8 @@ public class ImagePickerActivity extends AppCompatActivity
           @Override public void onItemClick(View view, Object item, int position) {
             if (item instanceof Image) {
               presenter.toggleSelect(item);
+            } else if (item instanceof PickerItem) {
+              captureImageWithPermission();
             }
           }
         })

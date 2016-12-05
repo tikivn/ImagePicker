@@ -22,7 +22,7 @@ public class LocalImageLoader {
   private static final String[] PROJECTION = new String[] {
       MediaStore.Images.Media.DATA,
   };
-
+  private static final String TAG = "LocalImageLoader";
   private WeakReference<Context> contextWeakReference;
 
   Observable<List<Image>> loadImage(final Context context) {
@@ -73,6 +73,7 @@ public class LocalImageLoader {
             } while (cursor.moveToPrevious());
           }
           subscriber.onNext(images);
+          subscriber.onCompleted();
         } catch (Exception e) {
           subscriber.onError(e);
         } finally {

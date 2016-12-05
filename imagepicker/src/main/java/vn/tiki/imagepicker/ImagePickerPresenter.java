@@ -13,6 +13,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import vn.tiki.imagepicker.entity.Image;
+import vn.tiki.imagepicker.entity.PickerItem;
 import vn.tiki.imagepicker.mvp.MvpPresenter;
 
 /**
@@ -24,12 +25,14 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
   private static final int MAX = 5;
   private static final String TAG = "ImagePickerPresenter";
   private final LocalImageLoader imageLoader;
+  private final boolean cameraSupported;
   private CompositeSubscription subscription = new CompositeSubscription();
   private List<Object> items = Collections.emptyList();
   private int count = 0;
 
-  ImagePickerPresenter(@NonNull LocalImageLoader imageLoader) {
+  ImagePickerPresenter(@NonNull LocalImageLoader imageLoader, boolean cameraSupported) {
     this.imageLoader = imageLoader;
+    this.cameraSupported = cameraSupported;
   }
 
   void toggleSelect(final Object item) {
@@ -71,11 +74,32 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
     getView().showLoading();
 
     subscription.add(imageLoader.loadImage(context)
+        .flatMap(new Func1<List<Image>, Observable<Image>>() {
+          @Override public Observable<Image> call(List<Image> images) {
+            return Observable.from(images);
+          }
+        })
+        .map(new Func1<Image, Image>() {
+          @Override public Image call(Image image) {
+            if (items.isEmpty()) {
+              return image;
+            }
+            for (Object item : items) {
+              if (item.equals(image)) {
+                return (Image) item;
+              }
+            }
+            return image;
+          }
+        })
+        .toList()
         .map(new Func1<List<Image>, List<Object>>() {
           @Override public List<Object> call(List<Image> images) {
             final int size = images.size();
             final ArrayList<Object> items = new ArrayList<>(size);
-            //items.add(new PickerItem());
+            if (cameraSupported) {
+              items.add(new PickerItem());
+            }
             if (size > 0) {
               items.addAll(images);
             }

@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Log.d(TAG, "onCreate: ");
     setContentView(R.layout.activity_main);
     galleryPicker.setCallback(new Callback() {
       @Override public void onSuccess(String imagePath) {
@@ -41,20 +40,8 @@ public class MainActivity extends AppCompatActivity {
     });
   }
 
-  @Override protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    Log.d(TAG, "onSaveInstanceState: ");
-  }
-
-  @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    super.onRestoreInstanceState(savedInstanceState);
-    Log.d(TAG, "onRestoreInstanceState: ");
-
-  }
-
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    Log.d(TAG, "onActivityResult: ");
     galleryPicker.handleResult(this, requestCode, resultCode, data);
     cameraPicker.handleResult(requestCode, resultCode, data);
   }
@@ -75,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     if (cameraPicker.isSupported(this)) {
       cameraPicker.openPicker(this);
     } else {
-      Toast.makeText(this, "Your device not support", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, "Your device is not supported", Toast.LENGTH_SHORT).show();
     }
   }
 

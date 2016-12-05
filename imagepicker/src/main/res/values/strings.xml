@@ -2,10 +2,15 @@
 <resources>
   <string name="msg_no_write_external_permission">Please grant storage permission to select images
   </string>
-  <string name="permission_not_granted">Permission is not granted</string>
+  <string name="msg_no_camera_permission">Please grant camera permission to capture image</string>
+
+  <string name="permission_denied">Permission denied</string>
   <string name="ok">OK</string>
   <string name="cancel">Cancel</string>
   <string name="done">Done</string>
   <string name="setting">Setting</string>
   <string name="title_settings_dialog">Open settings</string>
+  <string name="error_create_image_file">Failed to create image file</string>
+  <string name="error_no_camera">No camera found</string>
+  <string name="selection_format">(%1$d/%2$d)</string>
 </resources>

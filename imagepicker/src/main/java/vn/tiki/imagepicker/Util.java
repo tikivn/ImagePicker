@@ -24,6 +24,25 @@ public class Util {
     //no instance
   }
 
+  public static File createImageFile(String directory) throws IOException {
+
+    // External sdcard location
+    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), directory);
+
+    // Create the storage directory if it does not exist
+    if (!mediaStorageDir.exists()) {
+      if (!mediaStorageDir.mkdirs()) {
+        throw new IOException("Can't create image directory");
+      }
+    }
+
+    // Create a media file name
+    String timeStamp = DATE_FORMAT.format(new Date());
+    String imageFileName = "IMG_" + timeStamp;
+
+    return File.createTempFile(imageFileName, ".jpg", mediaStorageDir);
+  }
+
   static File createImageFile(Context context) throws IOException {
     // Create an image file name
     final String timeStamp = DATE_FORMAT.format(new Date());
