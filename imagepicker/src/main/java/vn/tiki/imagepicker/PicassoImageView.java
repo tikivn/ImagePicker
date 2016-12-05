@@ -1,6 +1,7 @@
 package vn.tiki.imagepicker;
 
 import android.content.Context;
+import android.databinding.BindingAdapter;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
@@ -12,10 +13,14 @@ import java.io.File;
  */
 
 public class PicassoImageView extends ImageView {
-  private static final String TAG = "PicassoImageView";
 
   public PicassoImageView(Context context, AttributeSet attrs) {
     super(context, attrs);
+  }
+
+  @BindingAdapter("filePath")
+  public static void bindFilePath(PicassoImageView imageView, String filePath) {
+    imageView.setImagePath(filePath);
   }
 
   public void setImagePath(String filePath) {

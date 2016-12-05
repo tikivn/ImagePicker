@@ -1,6 +1,5 @@
 package vn.tiki.imagepicker;
 
-import android.databinding.BindingAdapter;
 import android.os.Environment;
 import java.io.File;
 import java.io.IOException;
@@ -40,8 +39,4 @@ public class Util {
     return File.createTempFile(imageFileName, ".jpg", mediaStorageDir);
   }
 
-  @BindingAdapter("filePath")
-  public static void loadImageFileToImageView(PicassoImageView imageView, String filePath) {
-    imageView.setImagePath(filePath);
-  }
 }
