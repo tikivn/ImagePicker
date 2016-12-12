@@ -1,6 +1,7 @@
 package vn.tiki.imagepicker;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
@@ -36,8 +37,6 @@ import vn.tiki.noadapter.OnItemClickListener;
 import vn.tiki.noadapter.OnlyAdapter;
 import vn.tiki.noadapter.TypeDeterminer;
 
-import static android.app.Activity.RESULT_OK;
-
 /**
  * Created by Giang Nguyen on 12/2/16.
  */
@@ -55,6 +54,13 @@ public class ImagePickerActivity extends AppCompatActivity
   private View vLoading;
   private View vEmpty;
   private String currentImagePath;
+  private int max;
+
+  public static Intent start(Context context, int max) {
+    Intent starter = new Intent(context, ImagePickerActivity.class);
+    starter.putExtra("max", max);
+    return starter;
+  }
 
   @NonNull private Intent cameraIntent() {
     return new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -65,9 +71,11 @@ public class ImagePickerActivity extends AppCompatActivity
 
     LocalImageLoader imageLoader = new LocalImageLoader();
     final boolean pickerSupported = cameraIntent().resolveActivity(getPackageManager()) != null;
+    max = getIntent().getIntExtra("max", 5);
     presenter = new ImagePickerPresenter(
         imageLoader,
-        pickerSupported);
+        pickerSupported,
+        max);
 
     setContentView(R.layout.activity_picker_image_picker);
 
@@ -80,7 +88,7 @@ public class ImagePickerActivity extends AppCompatActivity
     setupLayoutManager(4);
 
     setupAdapter();
-    setTitle(getString(R.string.selection_format, 0, 5));
+    setTitle(getString(R.string.selection_format, 0, max));
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -283,7 +291,7 @@ public class ImagePickerActivity extends AppCompatActivity
   }
 
   @Override public void showCount(int count) {
-    setTitle(getString(R.string.selection_format, count, 5));
+    setTitle(getString(R.string.selection_format, count, max));
   }
 
   private void setupLayoutManager(int spanCount) {

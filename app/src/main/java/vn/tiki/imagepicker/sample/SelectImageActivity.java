@@ -44,7 +44,7 @@ public class SelectImageActivity extends AppCompatActivity {
         .setOnClickListener(new View.OnClickListener() {
           @Override public void onClick(View v) {
             startActivityForResult(
-                new Intent(SelectImageActivity.this, ImagePickerActivity.class),
+                ImagePickerActivity.start(SelectImageActivity.this, 3),
                 IC_PICK_IMAGE);
           }
         });

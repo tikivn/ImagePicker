@@ -5,7 +5,7 @@ ext {
 
   ci = 'true'.equals(System.getenv('CI'))
 
-  imagePicker = "vn.tiki.imagepicker:imagepicker:2.0.0-SNAPSHOT"
+  imagePicker = project(":imagepicker")//"vn.tiki.imagepicker:imagepicker:2.0.0-SNAPSHOT"
   appCompatV7 = 'com.android.support:appcompat-v7:25.0.1'
   recyclerViewV7 = 'com.android.support:recyclerview-v7:25.0.1'
   supportAnnotations = 'com.android.support:support-annotations:25.0.1'

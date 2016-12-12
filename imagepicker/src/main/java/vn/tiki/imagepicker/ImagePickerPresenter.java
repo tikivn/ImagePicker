@@ -22,17 +22,18 @@ import vn.tiki.imagepicker.mvp.MvpPresenter;
 
 class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
 
-  private static final int MAX = 5;
   private static final String TAG = "ImagePickerPresenter";
   private final LocalImageLoader imageLoader;
   private final boolean cameraSupported;
+  private final int max;
   private CompositeSubscription subscription = new CompositeSubscription();
   private List<Object> items = Collections.emptyList();
   private int count = 0;
 
-  ImagePickerPresenter(@NonNull LocalImageLoader imageLoader, boolean cameraSupported) {
+  ImagePickerPresenter(@NonNull LocalImageLoader imageLoader, boolean cameraSupported, int max) {
     this.imageLoader = imageLoader;
     this.cameraSupported = cameraSupported;
+    this.max = max;
   }
 
   void toggleSelect(final Object item) {
@@ -44,7 +45,7 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
               if (((Image) o).isSelected()) {
                 index = 0;
                 count--;
-              } else if (count >= MAX) {
+              } else if (count >= max) {
                 return o;
               } else {
                 count++;
