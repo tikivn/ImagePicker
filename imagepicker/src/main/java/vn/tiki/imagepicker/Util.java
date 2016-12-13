@@ -1,6 +1,10 @@
 package vn.tiki.imagepicker;
 
+import android.content.Context;
+import android.graphics.Point;
 import android.os.Environment;
+import android.view.Display;
+import android.view.WindowManager;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -37,6 +41,16 @@ public class Util {
     String imageFileName = "IMG_" + timeStamp;
 
     return File.createTempFile(imageFileName, ".jpg", mediaStorageDir);
+  }
+
+  public static int getScreenWidth(Context context){
+
+    WindowManager wm = (WindowManager)    context.getSystemService(Context.WINDOW_SERVICE);
+    Display display = wm.getDefaultDisplay();
+    Point size = new Point();
+    display.getSize(size);
+    return size.x;
+
   }
 
 }
