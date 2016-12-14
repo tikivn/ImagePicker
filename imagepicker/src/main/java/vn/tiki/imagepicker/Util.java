@@ -43,14 +43,12 @@ public class Util {
     return File.createTempFile(imageFileName, ".jpg", mediaStorageDir);
   }
 
-  public static int getScreenWidth(Context context){
+  public static int getScreenWidth(Context context) {
 
-    WindowManager wm = (WindowManager)    context.getSystemService(Context.WINDOW_SERVICE);
+    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     Display display = wm.getDefaultDisplay();
     Point size = new Point();
     display.getSize(size);
     return size.x;
-
   }
-
 }

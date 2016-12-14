@@ -3,7 +3,6 @@ package vn.tiki.imagepicker;
 import android.content.Context;
 import android.databinding.BindingAdapter;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
@@ -14,8 +13,6 @@ import java.io.File;
  */
 
 public class PicassoImageView extends ImageView {
-
-  private static final String TAG = "PicassoImageView";
 
   public PicassoImageView(Context context, AttributeSet attrs) {
     super(context, attrs);
