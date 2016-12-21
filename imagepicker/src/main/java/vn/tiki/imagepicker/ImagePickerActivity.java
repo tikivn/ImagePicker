@@ -23,6 +23,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
@@ -32,10 +33,13 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 import vn.tiki.imagepicker.entity.Image;
 import vn.tiki.imagepicker.entity.PickerItem;
-import vn.tiki.noadapter.LayoutSelector;
+import vn.tiki.imagepicker.viewholder.CaptureViewHolder;
+import vn.tiki.imagepicker.viewholder.ImageViewHolder;
+import vn.tiki.noadapter.AbsViewHolder;
 import vn.tiki.noadapter.OnItemClickListener;
 import vn.tiki.noadapter.OnlyAdapter;
 import vn.tiki.noadapter.TypeDeterminer;
+import vn.tiki.noadapter.ViewHolderSelector;
 
 /**
  * Created by Giang Nguyen on 12/2/16.
@@ -318,15 +322,15 @@ public class ImagePickerActivity extends AppCompatActivity
             return 0;
           }
         })
-        .layoutSelector(new LayoutSelector() {
-          @Override public int layoutForType(int type) {
+        .viewHolderSelector(new ViewHolderSelector() {
+          @Override public AbsViewHolder viewHolderForType(ViewGroup parent, int type) {
             switch (type) {
-              case 2:
-                return R.layout.item_image_list_image_picker;
               case 1:
-                return R.layout.item_image_list_image_picker_selected;
+                return ImageViewHolder.create(parent, true);
+              case 2:
+                return ImageViewHolder.create(parent, false);
               default:
-                return R.layout.item_camera_capture_image_picker;
+                return CaptureViewHolder.create(parent);
             }
           }
         })
