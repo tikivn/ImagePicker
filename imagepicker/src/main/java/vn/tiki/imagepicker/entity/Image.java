@@ -39,9 +39,12 @@ public class Image {
   }
 
   @Override public String toString() {
-    return "Image{" +
-        "path='" + path + '\'' +
-        ", selected=" + selected +
-        '}';
+    return "Image{"
+        + "path='"
+        + path
+        + '\''
+        + ", selected="
+        + selected
+        + '}';
   }
 }
