@@ -2,9 +2,7 @@ package vn.tiki.imagepicker;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -27,8 +25,8 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
   private final boolean cameraSupported;
   private final int max;
   private CompositeSubscription subscription = new CompositeSubscription();
-  private List<Object> items = Collections.emptyList();
-  private int count = 0;
+  private ArrayList<String> selectedPaths = new ArrayList<>();
+  private Observable<Object> itemsObservable;
 
   ImagePickerPresenter(@NonNull LocalImageLoader imageLoader, boolean cameraSupported, int max) {
     this.imageLoader = imageLoader;
@@ -36,80 +34,63 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
     this.max = max;
   }
 
+  @Override public void detachView() {
+    super.detachView();
+    subscription.clear();
+  }
+
   void toggleSelect(final Object item) {
-    subscription.add(Observable.from(this.items)
-        .map(new Func1<Object, Object>() {
-          @Override public Object call(Object o) {
-            if (o.equals(item) && o instanceof Image) {
-              final int index;
-              if (((Image) o).isSelected()) {
-                index = 0;
-                count--;
-              } else if (count >= max) {
-                return o;
-              } else {
-                count++;
-                index = count;
-              }
-              return new Image(((Image) o).getPath(), index);
-            }
-            return o;
-          }
-        })
-        .toList().doOnNext(cache()).subscribe(new Action1<List<Object>>() {
-          @Override public void call(List<Object> objects) {
-            final ImagePickerView view = getView();
-            if (view != null) {
-              view.showItems(objects);
-              view.showCount(count);
-            }
-          }
-        }));
+    if (!(item instanceof Image)) {
+      return;
+    }
+
+    final Image image = ((Image) item);
+    if (image.isSelected()) {
+      deselect(image);
+    } else if (selectedPaths.size() >= max) {
+      getView().showExceededNotification();
+    } else {
+      select(image);
+    }
   }
 
   void loadImages(Context context) {
+    Observable<Image> localImagesObservable = imageLoader.loadImage(context)
+        .flatMap(new Func1<List<Image>, Observable<Image>>() {
+          @Override public Observable<Image> call(List<Image> images) {
+            return Observable.from(images);
+          }
+        })
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread());
+
+    if (!selectedPaths.isEmpty()) {
+      localImagesObservable = localImagesObservable.map(new Func1<Image, Image>() {
+        @Override public Image call(Image image) {
+          if (selectedPaths.contains(image.getPath())) {
+            return new Image(image.getPath(), true);
+          }
+          return image;
+        }
+      });
+    }
+
+    final Observable<Object> itemsObservable;
+    if (cameraSupported) {
+      itemsObservable = Observable.<Object>just(new PickerItem())
+          .mergeWith(localImagesObservable.cast(Object.class));
+    } else {
+      itemsObservable = localImagesObservable.cast(Object.class);
+    }
+
     if (getView() == null) {
       return;
     }
 
     getView().showLoading();
 
-    subscription.add(imageLoader.loadImage(context)
-        .flatMap(new Func1<List<Image>, Observable<Image>>() {
-          @Override public Observable<Image> call(List<Image> images) {
-            return Observable.from(images);
-          }
-        })
-        .map(new Func1<Image, Image>() {
-          @Override public Image call(Image image) {
-            if (items.isEmpty()) {
-              return image;
-            }
-            for (Object item : items) {
-              if (item.equals(image)) {
-                return (Image) item;
-              }
-            }
-            return image;
-          }
-        })
-        .toList()
-        .map(new Func1<List<Image>, List<Object>>() {
-          @Override public List<Object> call(List<Image> images) {
-            final int size = images.size();
-            final ArrayList<Object> items = new ArrayList<>(size);
-            if (cameraSupported) {
-              items.add(new PickerItem());
-            }
-            if (size > 0) {
-              items.addAll(images);
-            }
-            return items;
-          }
-        })
+    subscription.add(itemsObservable.toList()
         .doOnNext(cache())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<List<Object>>() {
           @Override public void call(List<Object> images) {
             final ImagePickerView view = getView();
@@ -128,35 +109,80 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
             if (getView() != null) {
               getView().hideLoading();
             }
-            Log.e(TAG, "call: load images", throwable);
           }
         }));
   }
 
+  ArrayList<String> getSelectedImagePaths() {
+    return selectedPaths;
+  }
+
   @NonNull private Action1<List<Object>> cache() {
     return new Action1<List<Object>>() {
-
       @Override public void call(List<Object> objects) {
-        items = objects;
+        ImagePickerPresenter.this.itemsObservable = Observable.from(objects);
       }
     };
   }
 
-  @Override public void detachView() {
-    super.detachView();
-    subscription.clear();
+  private void select(final Image image) {
+    itemsObservable = itemsObservable.map(new Func1<Object, Object>() {
+      @Override public Object call(Object o) {
+        if (o.equals(image)) {
+          return new Image(((Image) o).getPath(), true);
+        }
+        return o;
+      }
+    });
+
+    updateSelectedPaths();
+
+    updateItemsDisplay();
   }
 
-  ArrayList<String> getSelectedImagePaths() {
-    if (items.isEmpty()) {
-      return new ArrayList<>(0);
-    }
-    final ArrayList<String> selectedImagePaths = new ArrayList<>();
-    for (Object item : items) {
-      if (item instanceof Image && ((Image) item).isSelected()) {
-        selectedImagePaths.add(((Image) item).getPath());
+  private void deselect(final Image image) {
+    itemsObservable = itemsObservable.map(new Func1<Object, Object>() {
+      @Override public Object call(Object o) {
+        if (o.equals(image)) {
+          return new Image(((Image) o).getPath(), false);
+        }
+        return o;
       }
-    }
-    return selectedImagePaths;
+    });
+
+    updateSelectedPaths();
+
+    updateItemsDisplay();
+  }
+
+  private void updateItemsDisplay() {
+    subscription.add(itemsObservable.toList().subscribe(new Action1<List<Object>>() {
+      @Override public void call(List<Object> objects) {
+        final ImagePickerView view = getView();
+        if (view != null) {
+          view.showItems(objects);
+        }
+      }
+    }));
+  }
+
+  private void updateSelectedPaths() {
+    subscription.add(itemsObservable.filter(new Func1<Object, Boolean>() {
+      @Override public Boolean call(Object o) {
+        return o instanceof Image && ((Image) o).isSelected();
+      }
+    }).cast(Image.class).map(new Func1<Image, String>() {
+      @Override public String call(Image image) {
+        return image.getPath();
+      }
+    }).toList().subscribe(new Action1<List<String>>() {
+      @Override public void call(List<String> strings) {
+        selectedPaths = new ArrayList<>(strings);
+        final ImagePickerView view = getView();
+        if (view != null) {
+          view.showCount(selectedPaths.size());
+        }
+      }
+    }));
   }
 }

@@ -67,7 +67,7 @@ public class LocalImageLoader {
 
               file = new File(path);
               if (file.exists()) {
-                final Image image = new Image(path, 0);
+                final Image image = new Image(path, false);
                 images.add(image);
               }
             } while (cursor.moveToPrevious());

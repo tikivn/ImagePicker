@@ -7,11 +7,11 @@ package vn.tiki.imagepicker.entity;
 public class Image {
 
   private final String path;
-  private final int index;
+  private final boolean selected;
 
-  public Image(String path, int index) {
+  public Image(String path, boolean selected) {
     this.path = path;
-    this.index = index;
+    this.selected = selected;
   }
 
   public String getPath() {
@@ -19,7 +19,7 @@ public class Image {
   }
 
   public boolean isSelected() {
-    return index > 0;
+    return selected;
   }
 
   @Override public boolean equals(Object o) {
@@ -28,10 +28,20 @@ public class Image {
 
     Image image = (Image) o;
 
+    if (isSelected() != image.isSelected()) return false;
     return getPath() != null ? getPath().equals(image.getPath()) : image.getPath() == null;
   }
 
   @Override public int hashCode() {
-    return getPath() != null ? getPath().hashCode() : 0;
+    int result = getPath() != null ? getPath().hashCode() : 0;
+    result = 31 * result + (isSelected() ? 1 : 0);
+    return result;
+  }
+
+  @Override public String toString() {
+    return "Image{" +
+        "path='" + path + '\'' +
+        ", selected=" + selected +
+        '}';
   }
 }

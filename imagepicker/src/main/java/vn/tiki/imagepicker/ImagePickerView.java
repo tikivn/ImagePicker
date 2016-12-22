@@ -18,4 +18,6 @@ public interface ImagePickerView {
   void showEmpty();
 
   void showCount(int count);
+
+  void showExceededNotification();
 }

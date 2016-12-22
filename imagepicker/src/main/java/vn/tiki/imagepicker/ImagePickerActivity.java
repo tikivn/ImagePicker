@@ -16,7 +16,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -53,7 +52,6 @@ public class ImagePickerActivity extends AppCompatActivity
   private static final int RC_CAPTURE = 4;
   private RecyclerView rvImages;
   private OnlyAdapter adapter;
-  private List<?> items;
   private ImagePickerPresenter presenter;
   private View vLoading;
   private View vEmpty;
@@ -92,7 +90,7 @@ public class ImagePickerActivity extends AppCompatActivity
     setupLayoutManager(4);
 
     setupAdapter();
-    setTitle(getString(R.string.selection_format, 0, max));
+    showCount(0);
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -143,7 +141,7 @@ public class ImagePickerActivity extends AppCompatActivity
         break;
       case RC_CAPTURE:
         if (resultCode == RESULT_OK && currentImagePath != null) {
-          Uri imageUri = Uri.parse(currentImagePath);
+          final Uri imageUri = Uri.parse(currentImagePath);
           if (imageUri != null) {
             final String path = imageUri.getPath();
             MediaScannerConnection.scanFile(this,
@@ -213,9 +211,9 @@ public class ImagePickerActivity extends AppCompatActivity
     if (intent.resolveActivity(getPackageManager()) != null) {
       try {
         final File imageFile = Util.createImageFile("Camera");
+        currentImagePath = imageFile.getAbsolutePath();
         final String authority = getPackageName() + ".file_provider";
         final Uri uri = FileProvider.getUriForFile(this, authority, imageFile);
-        currentImagePath = "file:" + imageFile.getAbsolutePath();
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         startActivityForResult(intent, RC_CAPTURE);
       } catch (IOException e) {
@@ -271,12 +269,7 @@ public class ImagePickerActivity extends AppCompatActivity
   @Override public void showItems(@NonNull List<?> items) {
     vLoading.setVisibility(View.GONE);
     rvImages.setVisibility(View.VISIBLE);
-    final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ItemDiffCallback(
-        items,
-        this.items));
     adapter.setItems(items);
-    diffResult.dispatchUpdatesTo(adapter);
-    this.items = items;
   }
 
   @Override public void showLoading() {
@@ -296,6 +289,10 @@ public class ImagePickerActivity extends AppCompatActivity
 
   @Override public void showCount(int count) {
     setTitle(getString(R.string.selection_format, count, max));
+  }
+
+  @Override public void showExceededNotification() {
+    Toast.makeText(this, getString(R.string.msg_exceeded_format, max), Toast.LENGTH_SHORT).show();
   }
 
   private void setupLayoutManager(int spanCount) {
@@ -343,42 +340,9 @@ public class ImagePickerActivity extends AppCompatActivity
             }
           }
         })
+        .diffCallback(new ImageItemDiffCallback())
         .build();
 
     rvImages.setAdapter(adapter);
-  }
-
-  static class ItemDiffCallback extends DiffUtil.Callback {
-
-    private final List<?> newItems;
-    private final List<?> oldItems;
-
-    ItemDiffCallback(List<?> newItems,
-        List<?> oldItems) {
-      this.newItems = newItems;
-      this.oldItems = oldItems;
-    }
-
-    @Override public int getOldListSize() {
-      return oldItems == null ? 0 : oldItems.size();
-    }
-
-    @Override public int getNewListSize() {
-      return newItems == null ? 0 : newItems.size();
-    }
-
-    @Override public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-      return oldItems.get(oldItemPosition).equals(newItems.get(newItemPosition));
-    }
-
-    @Override public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-      final Object oldItem = oldItems.get(oldItemPosition);
-      final Object newItem = this.newItems.get(newItemPosition);
-      if (oldItem instanceof Image) {
-        return newItem instanceof Image
-            && ((Image) oldItem).isSelected() == ((Image) newItem).isSelected();
-      }
-      return !(newItem instanceof Image);
-    }
   }
 }
