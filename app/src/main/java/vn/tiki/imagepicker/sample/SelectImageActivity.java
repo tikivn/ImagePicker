@@ -25,6 +25,7 @@ public class SelectImageActivity extends AppCompatActivity {
 
   private static final String TAG = "SelectImageActivity";
   private static final int IC_PICK_IMAGE = 1010;
+  private ArrayList<String> imagePaths;
 
   @SuppressWarnings("ResultOfMethodCallIgnored") public static void rm(File file) {
     if (file.isDirectory()) {
@@ -44,7 +45,7 @@ public class SelectImageActivity extends AppCompatActivity {
         .setOnClickListener(new View.OnClickListener() {
           @Override public void onClick(View v) {
             startActivityForResult(
-                ImagePickerActivity.start(SelectImageActivity.this, 3),
+                ImagePickerActivity.start(SelectImageActivity.this, 2, imagePaths),
                 IC_PICK_IMAGE);
           }
         });
@@ -55,7 +56,7 @@ public class SelectImageActivity extends AppCompatActivity {
     if (requestCode == IC_PICK_IMAGE) {
       if (resultCode == RESULT_OK) {
 
-        final ArrayList<String> imagePaths = data.getStringArrayListExtra("imagePaths");
+        imagePaths = data.getStringArrayListExtra("imagePaths");
         final File cacheDir = getExternalCacheDir();
 
         Observable.from(imagePaths)

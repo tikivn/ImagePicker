@@ -55,12 +55,17 @@ public class ImagePickerActivity extends AppCompatActivity
   private ImagePickerPresenter presenter;
   private View vLoading;
   private View vEmpty;
+  private View vRootView;
   private String currentImagePath;
   private int max;
+  private Snackbar exceedNotification;
 
-  public static Intent start(Context context, int max) {
+  public static Intent start(Context context, int max, ArrayList<String> selectedPaths) {
     Intent starter = new Intent(context, ImagePickerActivity.class);
     starter.putExtra("max", max);
+    if (selectedPaths != null && !selectedPaths.isEmpty()) {
+      starter.putExtra("selectedPaths", selectedPaths);
+    }
     return starter;
   }
 
@@ -73,11 +78,14 @@ public class ImagePickerActivity extends AppCompatActivity
 
     LocalImageLoader imageLoader = new LocalImageLoader();
     final boolean pickerSupported = cameraIntent().resolveActivity(getPackageManager()) != null;
-    max = getIntent().getIntExtra("max", 5);
+    final Intent intent = getIntent();
+    max = intent.getIntExtra("max", 5);
+    final ArrayList<String> selectedPaths = intent.getStringArrayListExtra("selectedPaths");
     presenter = new ImagePickerPresenter(
         imageLoader,
         pickerSupported,
-        max);
+        max,
+        selectedPaths);
 
     setContentView(R.layout.activity_picker_image_picker);
 
@@ -86,11 +94,18 @@ public class ImagePickerActivity extends AppCompatActivity
     rvImages = (RecyclerView) findViewById(R.id.rvImages);
     vLoading = this.findViewById(R.id.vLoading);
     vEmpty = this.findViewById(R.id.vEmpty);
+    vRootView = this.findViewById(R.id.vRootView);
 
     setupLayoutManager(4);
 
     setupAdapter();
-    showCount(0);
+
+    setupExceedNotification();
+  }
+
+  private void setupExceedNotification() {
+    final String message = getString(R.string.msg_exceeded_format, max);
+    exceedNotification = Snackbar.make(vRootView, message, Snackbar.LENGTH_SHORT);
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -278,10 +293,6 @@ public class ImagePickerActivity extends AppCompatActivity
     vEmpty.setVisibility(View.GONE);
   }
 
-  @Override public void hideLoading() {
-    vLoading.setVisibility(View.GONE);
-  }
-
   @Override public void showEmpty() {
     vLoading.setVisibility(View.GONE);
     vEmpty.setVisibility(View.VISIBLE);
@@ -292,7 +303,15 @@ public class ImagePickerActivity extends AppCompatActivity
   }
 
   @Override public void showExceededNotification() {
-    Toast.makeText(this, getString(R.string.msg_exceeded_format, max), Toast.LENGTH_SHORT).show();
+    if (exceedNotification.isShown()) {
+      return;
+    }
+    exceedNotification.show();
+  }
+
+  @Override public void showError() {
+    Toast.makeText(this, R.string.error_can_not_load_images, Toast.LENGTH_SHORT).show();
+    finish();
   }
 
   private void setupLayoutManager(int spanCount) {

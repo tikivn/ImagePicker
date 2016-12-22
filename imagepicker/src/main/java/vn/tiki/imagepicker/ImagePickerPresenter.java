@@ -25,13 +25,15 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
   private final boolean cameraSupported;
   private final int max;
   private CompositeSubscription subscription = new CompositeSubscription();
-  private ArrayList<String> selectedPaths = new ArrayList<>();
+  private ArrayList<String> selectedPaths;
   private Observable<Object> itemsObservable;
 
-  ImagePickerPresenter(@NonNull LocalImageLoader imageLoader, boolean cameraSupported, int max) {
+  ImagePickerPresenter(@NonNull LocalImageLoader imageLoader, boolean cameraSupported, int max,
+      ArrayList<String> selectedPaths) {
     this.imageLoader = imageLoader;
     this.cameraSupported = cameraSupported;
     this.max = max;
+    this.selectedPaths = selectedPaths == null ? new ArrayList<String>() : selectedPaths;
   }
 
   @Override public void detachView() {
@@ -102,12 +104,13 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
               view.showEmpty();
             } else {
               view.showItems(images);
+              view.showCount(selectedPaths.size());
             }
           }
         }, new Action1<Throwable>() {
           @Override public void call(Throwable throwable) {
             if (getView() != null) {
-              getView().hideLoading();
+              getView().showError();
             }
           }
         }));

@@ -13,11 +13,11 @@ public interface ImagePickerView {
 
   void showLoading();
 
-  void hideLoading();
-
   void showEmpty();
 
   void showCount(int count);
 
   void showExceededNotification();
+
+  void showError();
 }
