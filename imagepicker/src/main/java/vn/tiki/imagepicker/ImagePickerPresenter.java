@@ -192,4 +192,11 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
       }
     }));
   }
+
+  void loadImagesAndSelect(Context context, String path) {
+    if (!selectedPaths.contains(path)) {
+      selectedPaths.add(path);
+    }
+    loadImages(context);
+  }
 }

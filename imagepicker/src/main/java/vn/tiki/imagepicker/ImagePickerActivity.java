@@ -163,10 +163,10 @@ public class ImagePickerActivity extends AppCompatActivity
                 new String[] { path }, null,
                 new MediaScannerConnection.OnScanCompletedListener() {
                   @Override
-                  public void onScanCompleted(String path, Uri uri) {
+                  public void onScanCompleted(final String path, Uri uri) {
                     runOnUiThread(new Runnable() {
                       @Override public void run() {
-                        loadImages();
+                        presenter.loadImagesAndSelect(ImagePickerActivity.this, path);
                       }
                     });
                   }
