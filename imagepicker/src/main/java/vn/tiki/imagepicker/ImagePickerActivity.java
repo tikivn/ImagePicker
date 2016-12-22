@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.databinding.ViewDataBinding;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -16,29 +17,30 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
+import vn.tiki.imagepicker.databinding.ItemImageListBinding;
+import vn.tiki.imagepicker.databinding.ItemImageListSelectedBinding;
 import vn.tiki.imagepicker.entity.Image;
 import vn.tiki.imagepicker.entity.PickerItem;
-import vn.tiki.imagepicker.viewholder.CaptureViewHolder;
-import vn.tiki.imagepicker.viewholder.ImageViewHolder;
-import vn.tiki.noadapter.AbsViewHolder;
+import vn.tiki.noadapter.ExtraBinding;
+import vn.tiki.noadapter.LayoutSelector;
 import vn.tiki.noadapter.OnItemClickListener;
 import vn.tiki.noadapter.OnlyAdapter;
 import vn.tiki.noadapter.TypeDeterminer;
-import vn.tiki.noadapter.ViewHolderSelector;
 
 /**
  * Created by Giang Nguyen on 12/2/16.
@@ -59,6 +61,8 @@ public class ImagePickerActivity extends AppCompatActivity
   private String currentImagePath;
   private int max;
   private Snackbar exceedNotification;
+  private DiffUtilCallback diffUtilCallback = new DiffUtilCallback();
+  private List<?> items = Collections.emptyList();
 
   public static Intent start(Context context, int max, ArrayList<String> selectedPaths) {
     Intent starter = new Intent(context, ImagePickerActivity.class);
@@ -281,10 +285,20 @@ public class ImagePickerActivity extends AppCompatActivity
     }
   }
 
-  @Override public void showItems(@NonNull List<?> items) {
+  @Override public void showItems(@NonNull List<?> newItems) {
     vLoading.setVisibility(View.GONE);
     rvImages.setVisibility(View.VISIBLE);
-    adapter.setItems(items);
+
+    diffUtilCallback.setItems(this.items);
+    diffUtilCallback.setNewItems(newItems);
+
+    final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffUtilCallback);
+
+    items.clear();
+    items = new ArrayList<>(newItems);
+
+    adapter.setItems(newItems);
+    diffResult.dispatchUpdatesTo(adapter);
   }
 
   @Override public void showLoading() {
@@ -338,15 +352,28 @@ public class ImagePickerActivity extends AppCompatActivity
             return 0;
           }
         })
-        .viewHolderSelector(new ViewHolderSelector() {
-          @Override public AbsViewHolder viewHolderForType(ViewGroup parent, int type) {
+        .layoutSelector(new LayoutSelector() {
+          @Override public int layoutForType(int type) {
             switch (type) {
               case 1:
-                return ImageViewHolder.create(parent, true);
+                return R.layout.item_image_list_selected;
               case 2:
-                return ImageViewHolder.create(parent, false);
+                return R.layout.item_image_list;
               default:
-                return CaptureViewHolder.create(parent);
+                return R.layout.item_camera_capture;
+            }
+          }
+        })
+        .customBinding(new ExtraBinding() {
+          @Override public void onBind(ViewDataBinding binding, Object item, int position) {
+            if (item instanceof Image) {
+              final PicassoImageView imageView;
+              if (binding instanceof ItemImageListBinding) {
+                imageView = ((ItemImageListBinding) binding).image;
+              } else {
+                imageView = ((ItemImageListSelectedBinding) binding).image;
+              }
+              imageView.setFilePath(((Image) item).getPath());
             }
           }
         })
@@ -363,7 +390,6 @@ public class ImagePickerActivity extends AppCompatActivity
             }
           }
         })
-        .diffCallback(new ImageItemDiffCallback())
         .build();
 
     rvImages.setAdapter(adapter);
