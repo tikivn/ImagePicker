@@ -355,7 +355,11 @@ public class ImagePickerActivity extends AppCompatActivity
             if (item instanceof Image) {
               presenter.toggleSelect(item);
             } else if (item instanceof PickerItem) {
-              captureImageWithPermission();
+              if (presenter.isMaximum()) {
+                showExceededNotification();
+              } else {
+                captureImageWithPermission();
+              }
             }
           }
         })

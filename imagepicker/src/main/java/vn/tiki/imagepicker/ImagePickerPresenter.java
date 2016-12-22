@@ -120,6 +120,10 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
     return selectedPaths;
   }
 
+  boolean isMaximum() {
+    return selectedPaths.size() == max;
+  }
+
   @NonNull private Action1<List<Object>> cache() {
     return new Action1<List<Object>>() {
       @Override public void call(List<Object> objects) {
