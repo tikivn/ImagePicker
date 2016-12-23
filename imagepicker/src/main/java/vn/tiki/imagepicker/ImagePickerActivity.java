@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.ViewDataBinding;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +31,9 @@ import java.util.Collections;
 import java.util.List;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import vn.tiki.imagepicker.databinding.ItemImageListBinding;
 import vn.tiki.imagepicker.databinding.ItemImageListSelectedBinding;
 import vn.tiki.imagepicker.entity.Image;
@@ -63,6 +65,7 @@ public class ImagePickerActivity extends AppCompatActivity
   private Snackbar exceedNotification;
   private DiffUtilCallback diffUtilCallback = new DiffUtilCallback();
   private List<?> items = Collections.emptyList();
+  private Subscription subscription;
 
   public static Intent start(Context context, int max, ArrayList<String> selectedPaths) {
     Intent starter = new Intent(context, ImagePickerActivity.class);
@@ -163,16 +166,12 @@ public class ImagePickerActivity extends AppCompatActivity
           final Uri imageUri = Uri.parse(currentImagePath);
           if (imageUri != null) {
             final String path = imageUri.getPath();
-            MediaScannerConnection.scanFile(this,
-                new String[] { path }, null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-                  @Override
-                  public void onScanCompleted(final String path, Uri uri) {
-                    runOnUiThread(new Runnable() {
-                      @Override public void run() {
-                        presenter.loadImagesAndSelect(ImagePickerActivity.this, path);
-                      }
-                    });
+            subscription = new RxMediaScannerConnection(this)
+                .scanFile(path)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Uri>() {
+                  @Override public void call(Uri uri) {
+                    presenter.loadImagesAndSelect(ImagePickerActivity.this, path);
                   }
                 });
           }
@@ -262,6 +261,9 @@ public class ImagePickerActivity extends AppCompatActivity
 
   @Override protected void onStop() {
     presenter.detachView();
+    if (subscription != null) {
+      subscription.unsubscribe();
+    }
     super.onStop();
   }
 
