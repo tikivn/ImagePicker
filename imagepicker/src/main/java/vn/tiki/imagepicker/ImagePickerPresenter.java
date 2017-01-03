@@ -3,6 +3,7 @@ package vn.tiki.imagepicker;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -20,7 +21,6 @@ import vn.tiki.imagepicker.mvp.MvpPresenter;
 
 class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
 
-  private static final String TAG = "ImagePickerPresenter";
   private final LocalImageLoader imageLoader;
   private final boolean cameraSupported;
   private final int max;
@@ -92,6 +92,11 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
     getView().showLoading();
 
     subscription.add(itemsObservable.toList()
+        .onErrorReturn(new Func1<Throwable, List<Object>>() {
+          @Override public List<Object> call(Throwable throwable) {
+            return Collections.<Object>singletonList(new PickerItem());
+          }
+        })
         .doOnNext(cache())
         .subscribe(new Action1<List<Object>>() {
           @Override public void call(List<Object> images) {
@@ -109,6 +114,7 @@ class ImagePickerPresenter extends MvpPresenter<ImagePickerView> {
           }
         }, new Action1<Throwable>() {
           @Override public void call(Throwable throwable) {
+            throwable.printStackTrace();
             if (getView() != null) {
               getView().showError();
             }

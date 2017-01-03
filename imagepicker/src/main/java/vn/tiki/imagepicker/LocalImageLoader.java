@@ -17,12 +17,11 @@ import vn.tiki.imagepicker.entity.Image;
  * Created by Giang Nguyen on 12/2/16.
  */
 
-public class LocalImageLoader {
+class LocalImageLoader {
 
   private static final String[] PROJECTION = new String[] {
       MediaStore.Images.Media.DATA,
   };
-  private static final String TAG = "LocalImageLoader";
   private WeakReference<Context> contextWeakReference;
 
   Observable<List<Image>> loadImage(final Context context) {

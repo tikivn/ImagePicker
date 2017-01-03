@@ -16,9 +16,18 @@ android {
     enabled = true
   }
 
+  signingConfigs {
+    release {
+      storeFile file('./debug.keystore')
+      keyAlias 'androiddebugkey'
+      keyPassword 'android'
+      storePassword 'android'
+    }
+  }
   buildTypes {
     release {
-      minifyEnabled false
+      minifyEnabled true
+      signingConfig signingConfigs.release
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
@@ -30,6 +39,8 @@ dependencies {
   compile rootProject.ext.appCompatV7
   compile rootProject.ext.imagePicker
   compile rootProject.ext.picasso
+  // And ProGuard rules for RxJava!
+  compile 'com.artemzin.rxjava:proguard-rules:1.2.4.0'
 
   debugCompile rootProject.ext.leakCanary
   releaseCompile rootProject.ext.leakCanaryNoOps
