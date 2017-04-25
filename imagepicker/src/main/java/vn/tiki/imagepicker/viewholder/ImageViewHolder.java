@@ -10,7 +10,7 @@ import java.io.File;
 import vn.tiki.imagepicker.R;
 import vn.tiki.imagepicker.Util;
 import vn.tiki.imagepicker.entity.Image;
-import vn.tiki.noadapter.AbsViewHolder;
+import vn.tiki.noadapter2.AbsViewHolder;
 
 /**
  * Created by Giang Nguyen on 12/21/16.

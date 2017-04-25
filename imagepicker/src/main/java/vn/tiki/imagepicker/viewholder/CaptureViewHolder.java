@@ -4,7 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import vn.tiki.imagepicker.R;
-import vn.tiki.noadapter.AbsViewHolder;
+import vn.tiki.noadapter2.AbsViewHolder;
 
 /**
  * Created by Giang Nguyen on 12/21/16.

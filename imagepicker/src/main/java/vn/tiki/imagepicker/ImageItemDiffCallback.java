@@ -1,7 +1,7 @@
 package vn.tiki.imagepicker;
 
 import vn.tiki.imagepicker.entity.Image;
-import vn.tiki.noadapter.DiffCallback;
+import vn.tiki.noadapter2.DiffCallback;
 
 /**
  * Created by Giang Nguyen on 12/21/16.

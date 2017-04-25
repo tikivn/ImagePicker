@@ -34,11 +34,11 @@ import vn.tiki.imagepicker.entity.Image;
 import vn.tiki.imagepicker.entity.PickerItem;
 import vn.tiki.imagepicker.viewholder.CaptureViewHolder;
 import vn.tiki.imagepicker.viewholder.ImageViewHolder;
-import vn.tiki.noadapter.AbsViewHolder;
-import vn.tiki.noadapter.OnItemClickListener;
-import vn.tiki.noadapter.OnlyAdapter;
-import vn.tiki.noadapter.TypeDeterminer;
-import vn.tiki.noadapter.ViewHolderSelector;
+import vn.tiki.noadapter2.AbsViewHolder;
+import vn.tiki.noadapter2.OnItemClickListener;
+import vn.tiki.noadapter2.OnlyAdapter;
+import vn.tiki.noadapter2.TypeFactory;
+import vn.tiki.noadapter2.ViewHolderFactory;
 
 /**
  * Created by Giang Nguyen on 12/2/16.
@@ -327,7 +327,7 @@ public class ImagePickerActivity extends AppCompatActivity
 
   private void setupAdapter() {
     adapter = new OnlyAdapter.Builder()
-        .typeDeterminer(new TypeDeterminer() {
+        .typeFactory(new TypeFactory() {
           @Override public int typeOf(Object item) {
             if (item instanceof Image) {
               if (((Image) item).isSelected()) {
@@ -338,7 +338,7 @@ public class ImagePickerActivity extends AppCompatActivity
             return 0;
           }
         })
-        .viewHolderSelector(new ViewHolderSelector() {
+        .viewHolderFactory(new ViewHolderFactory() {
           @Override public AbsViewHolder viewHolderForType(ViewGroup parent, int type) {
             switch (type) {
               case 1:
