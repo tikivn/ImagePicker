@@ -42,7 +42,7 @@ public class ImageViewHolder extends AbsViewHolder {
     final String filePath = ((Image) item).getPath();
     final int width = Util.getScreenWidth(itemView.getContext()) / 5;
 
-    final RequestCreator requestCreator = Picasso.with(itemView.getContext())
+    final RequestCreator requestCreator = Picasso.get()
         .load(new File(filePath));
 
     if (imageView.getScaleType() == ImageView.ScaleType.CENTER_CROP) {
@@ -57,7 +57,7 @@ public class ImageViewHolder extends AbsViewHolder {
 
   @Override public void unbind() {
     super.unbind();
-    Picasso.with(itemView.getContext())
+    Picasso.get()
         .cancelRequest(imageView);
   }
 }
