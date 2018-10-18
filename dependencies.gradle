@@ -14,7 +14,7 @@ ext {
   noAdapter = 'vn.tiki.noadapter2:noadapter:2.0.1'
   rxAndroid = 'io.reactivex:rxandroid:1.2.1'
   rxJava = 'io.reactivex:rxjava:1.2.0'
-  easyPermissions = 'pub.devrel:easypermissions:0.2.1'
+  easyPermissions = "pub.devrel:easypermissions:2.0.0"
   picasso = 'com.squareup.picasso:picasso:2.71828'
   leakCanary = 'com.squareup.leakcanary:leakcanary-android:1.5'
   leakCanaryNoOps = 'com.squareup.leakcanary:leakcanary-android:1.5'
