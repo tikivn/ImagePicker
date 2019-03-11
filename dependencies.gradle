@@ -1,7 +1,7 @@
 ext {
   minSdkVersion = 16
-  compileSdkVersion = 27
-  supportVersion = "27.1.1"
+  compileSdkVersion = 28
+  supportVersion = "28.0.0"
 
   ci = 'true' == System.getenv('CI')
 
@@ -23,3 +23,11 @@ ext {
   junit = 'junit:junit:4.12'
   espressoCore = 'com.android.support.test.espresso:espresso-core:2.2.2'
 }
+
+def aws = [:]
+aws.accessKey = project.hasProperty('AWS_ACCESS_KEY_ID') ? project.property('AWS_ACCESS_KEY_ID') : ""
+aws.secretKey = project.hasProperty('AWS_SECRET_ACCESS_KEY') ? project.property('AWS_SECRET_ACCESS_KEY') : ""
+aws.bucket = "tiki-mobile"
+aws.region = "ap-southeast-1"
+aws.path = "m2"
+ext.aws = aws

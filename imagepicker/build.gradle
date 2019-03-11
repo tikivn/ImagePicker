@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply from: '../gradle/s3-deploy.gradle'
 
 group = 'vn.tiki.imagepicker'
 
@@ -36,21 +37,21 @@ android {
 }
 
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
-  compile rootProject.ext.design
-  compile rootProject.ext.supportAnnotations
-  compile rootProject.ext.appCompatV7
-  compile rootProject.ext.recyclerViewV7
-  compile rootProject.ext.percent
-  compile rootProject.ext.noAdapter
-  compile rootProject.ext.picasso
-  compile rootProject.ext.rxJava
-  compile rootProject.ext.rxAndroid
-  compile rootProject.ext.easyPermissions
-  testCompile rootProject.ext.junit
-  androidTestCompile(rootProject.ext.espressoCore, {
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  implementation rootProject.ext.design
+  implementation rootProject.ext.supportAnnotations
+  implementation rootProject.ext.appCompatV7
+  implementation rootProject.ext.recyclerViewV7
+  implementation rootProject.ext.percent
+  implementation rootProject.ext.noAdapter
+  implementation rootProject.ext.picasso
+  api rootProject.ext.rxJava
+  api rootProject.ext.rxAndroid
+  api rootProject.ext.easyPermissions
+  testImplementation rootProject.ext.junit
+  androidTestImplementation(rootProject.ext.espressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
 }
 
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
+//apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
